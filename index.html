@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本のインターナショナルスクール動向レポート</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices:
+        - Market Size/Student Numbers (Report Sections 3.1, 3.2, 3.3, Table 1): Goal: Inform/Compare. Viz: Bar/Line charts (Chart.js). Interaction: Tooltips. Justification: Clear visual comparison of quantities and trends.
+        - Parent Motivations (Report Section 4.1, Table 2): Goal: Inform. Viz: Horizontal Bar chart (Chart.js). Interaction: Tooltips. Justification: Easy comparison of percentage-based motivations.
+        - Curriculum Comparison (Report Section 5.1, Table 3): Goal: Compare/Inform. Viz: Interactive Cards/Accordion (HTML/CSS/JS). Interaction: Click to expand details. Justification: Structured presentation of detailed comparative information.
+        - School Types (Report Section 2.1): Goal: Inform. Viz: Clickable definition boxes (HTML/CSS/JS). Interaction: Click to show details. Justification: Concise presentation of definitions.
+        - Textual Summaries: Goal: Inform. Presentation: Structured text blocks with headings and lists. Justification: Readability for qualitative insights.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Tailwind default is often Inter */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Default max-width */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 350px;
+                max-width: 700px;
+            }
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .chart-container {
+                height: 400px;
+                max-width: 800px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #b45309; /* amber-700 */
+        }
+        .content-section {
+            padding-top: 4rem; /* Offset for fixed header */
+            margin-top: -4rem; /* Negative margin for scroll spy */
+        }
+        .active-nav {
+            color: #b45309; /* amber-700 */
+            font-weight: 600;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .card h3 {
+            color: #c2410c; /* orange-700 */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-neutral-800">
+
+    <header class="bg-white shadow-md fixed w-full z-50 top-0">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl sm:text-2xl font-bold text-amber-700">日本のインターナショナルスクール動向</h1>
+                <nav class="hidden md:flex space-x-4">
+                    <a href="#introduction" class="nav-link px-3 py-2 rounded-md text-sm font-medium">序論</a>
+                    <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium">概要</a>
+                    <a href="#market-trends" class="nav-link px-3 py-2 rounded-md text-sm font-medium">市場動向</a>
+                    <a href="#demand-factors" class="nav-link px-3 py-2 rounded-md text-sm font-medium">需要要因</a>
+                    <a href="#curriculum" class="nav-link px-3 py-2 rounded-md text-sm font-medium">カリキュラム</a>
+                    <a href="#challenges" class="nav-link px-3 py-2 rounded-md text-sm font-medium">課題</a>
+                    <a href="#future-outlook" class="nav-link px-3 py-2 rounded-md text-sm font-medium">将来展望</a>
+                </nav>
+                <button id="mobile-menu-button" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-neutral-600 hover:text-amber-700 hover:bg-stone-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500">
+                    <span class="sr-only">メインメニューを開く</span>
+                    <svg class="h-6 w-6" id="menu-icon-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg class="h-6 w-6 hidden" id="menu-icon-close" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#introduction" class="nav-link block px-3 py-2 rounded-md text-base font-medium">序論</a>
+                <a href="#overview" class="nav-link block px-3 py-2 rounded-md text-base font-medium">概要</a>
+                <a href="#market-trends" class="nav-link block px-3 py-2 rounded-md text-base font-medium">市場動向</a>
+                <a href="#demand-factors" class="nav-link block px-3 py-2 rounded-md text-base font-medium">需要要因</a>
+                <a href="#curriculum" class="nav-link block px-3 py-2 rounded-md text-base font-medium">カリキュラム</a>
+                <a href="#challenges" class="nav-link block px-3 py-2 rounded-md text-base font-medium">課題</a>
+                <a href="#future-outlook" class="nav-link block px-3 py-2 rounded-md text-base font-medium">将来展望</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+
+        <section id="introduction" class="content-section py-8 md:py-12">
+            <h2 class="text-3xl font-bold text-amber-700 mb-6 text-center">序論：日本のインターナショナルスクールの変容</h2>
+            <p class="text-lg text-neutral-700 leading-relaxed mb-4">
+                日本のインターナショナルスクール市場は、グローバル化の進展と国内の教育ニーズの多様化を背景に、顕著な成長と変容を遂げています。かつては主に駐在員の子女を対象としたニッチな市場でしたが、近年では日本人家庭からの需要も高まり、国際的な教育機会を求める層にとって魅力的な選択肢となりつつあります。このアプリケーションは、その動向、課題、そして将来展望をインタラクティブに探ることを目的としています。
+            </p>
+            <p class="text-lg text-neutral-700 leading-relaxed">
+                市場の拡大に伴い、提供される教育内容も多様化しています。国際バカロレア（IB）などの国際的なカリキュラムの導入が進む一方、オンライン形式や特定の専門分野に特化したスクールも出現し、教育の選択肢は広がりを見せています。本SPAを通じて、日本のインターナショナルスクールの現状と未来について理解を深めていきましょう。
+            </p>
+        </section>
+
+        <section id="overview" class="content-section py-8 md:py-12 bg-white rounded-lg shadow-lg my-8 p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-amber-700 mb-8 text-center">概要：インターナショナルスクールとは</h2>
+            <p class="text-lg text-neutral-700 leading-relaxed mb-6">
+                日本における「インターナショナルスクール」という言葉は、法的に明確に定義されていません。その運営形態や法的地位は様々で、これが保護者にとって学校選択を複雑にする一因ともなっています。ここでは、主な類型と歴史的背景について概観します。
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">主な類型と法的地位</h3>
+                    <ul class="space-y-3">
+                        <li>
+                            <button class="accordion-button w-full text-left font-semibold text-lg p-3 bg-stone-200 rounded-md hover:bg-stone-300 transition duration-150" data-target="一条校">一条校とは？</button>
+                            <div id="一条校" class="accordion-content mt-2 p-3 bg-stone-50 rounded-md">
+                                学校教育法第一条に基づき認可された学校。日本の学習指導要領に準拠しつつ国際的な教育を提供。国内大学進学や編入が比較的スムーズ。
+                            </div>
+                        </li>
+                        <li>
+                            <button class="accordion-button w-full text-left font-semibold text-lg p-3 bg-stone-200 rounded-md hover:bg-stone-300 transition duration-150" data-target="各種学校">各種学校とは？</button>
+                            <div id="各種学校" class="accordion-content mt-2 p-3 bg-stone-50 rounded-md">
+                                伝統的なインターナショナルの多くが該当。都道府県知事の認可。日本の大学入学資格は自動付与されず、IBディプロマ等が別途必要になる場合がある。カリキュラムの自由度が高い。
+                            </div>
+                        </li>
+                        <li>
+                            <button class="accordion-button w-full text-left font-semibold text-lg p-3 bg-stone-200 rounded-md hover:bg-stone-300 transition duration-150" data-target="無認可校">無認可校とは？</button>
+                            <div id="無認可校" class="accordion-content mt-2 p-3 bg-stone-50 rounded-md">
+                                一条校・各種学校いずれの認可も受けていない教育施設。公的な監督が限定的。
+                            </div>
+                        </li>
+                        <li>
+                            <button class="accordion-button w-full text-left font-semibold text-lg p-3 bg-stone-200 rounded-md hover:bg-stone-300 transition duration-150" data-target="国際認定">国際的な評価団体による認定</button>
+                            <div id="国際認定" class="accordion-content mt-2 p-3 bg-stone-50 rounded-md">
+                                WASC、CIS、NEASC、ACSI、COBISなど。教育の質を保証し、国内外の大学進学資格を得る上で重要。
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">歴史と変遷</h3>
+                    <p class="text-neutral-600 leading-relaxed mb-2">第二次世界大戦後、主に外国人外交官や駐在員の子女向けに始まる。</p>
+                    <p class="text-neutral-600 leading-relaxed mb-2">バブル経済崩壊後、海外経験を持つ日本人家庭や、異なる教育選択肢を求める富裕層の間で関心が高まる。</p>
+                    <p class="text-neutral-600 leading-relaxed mb-2">近年のグローバル化で、英語能力や国際的視野の重要性が認識され、一般層にも関心が拡大。</p>
+                    <p class="text-neutral-600 leading-relaxed">英国名門校の日本校開校、インド系・中国系民族学校の増加、STEMや芸術特化型スクールの出現など、形態が多様化。アジア富裕層もターゲットに。 </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="market-trends" class="content-section py-8 md:py-12">
+            <h2 class="text-3xl font-bold text-amber-700 mb-8 text-center">市場動向：成長するグローバル教育市場</h2>
+            <p class="text-lg text-neutral-700 leading-relaxed mb-6 text-center">
+                世界のインターナショナルスクール市場は拡大を続けており、日本国内でもその波は着実に押し寄せています。生徒数や学校数の増加、そして地理的な展開は、この市場のダイナミズムを示しています。
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-4 text-center">世界の市場規模</h3>
+                    <div class="chart-container">
+                        <canvas id="globalMarketChart"></canvas>
+                    </div>
+                    <p class="text-sm text-neutral-600 mt-2 text-center">ISCリサーチ(2025年1月)によると、学校数14,833校、生徒数740万人、年間授業料収入673億米ドル。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-4 text-center">日本の生徒数・学校数</h3>
+                    <div class="chart-container">
+                        <canvas id="japanStudentSchoolChart"></canvas>
+                    </div>
+                    <p class="text-sm text-neutral-600 mt-2 text-center">各種学校認可校(2020年):143校、生徒31,023人。生徒数は2019年比11%増。</p>
+                </div>
+            </div>
+             <div class="card">
+                <h3 class="text-2xl font-semibold mb-3">地理的分布</h3>
+                <p class="text-neutral-600 leading-relaxed mb-2"><strong>都市部への集中:</strong> 東京（特に港区、渋谷区、世田谷区）、横浜、大阪、神戸、名古屋、福岡など。</p>
+                <p class="text-neutral-600 leading-relaxed"><strong>地方への拡大:</strong> ハロウ安比校（岩手）、ラグビースクールジャパン（千葉）など名門校の地方展開や、北海道ニセコ、大阪市生野区など地方自治体と連携した動きも。緩やかだが着実な地方分散が見られる。</p>
+            </div>
+        </section>
+
+        <section id="demand-factors" class="content-section py-8 md:py-12 bg-white rounded-lg shadow-lg my-8 p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-amber-700 mb-8 text-center">需要要因：なぜ選ばれるのか</h2>
+            <p class="text-lg text-neutral-700 leading-relaxed mb-6 text-center">
+                インターナショナルスクールが選ばれる背景には、保護者の多様な期待と、グローバル社会で求められる能力への意識の高まりがあります。
+            </p>
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4 text-center">保護者の主な動機</h3>
+                <div class="chart-container" style="height: 400px; max-height: 500px;">
+                    <canvas id="parentMotivationChart"></canvas>
+                </div>
+                <ul class="list-disc list-inside mt-4 text-neutral-600 space-y-1">
+                    <li><strong>英語能力の習得 (59%):</strong> 将来のキャリアで通用する「使える英語」への期待。</li>
+                    <li><strong>グローバルな視野と国際感覚 (42.9%):</strong> 多様な文化を理解する力の育成。</li>
+                    <li><strong>多文化的な学習環境 (21.6%):</strong> 様々な国籍の生徒との交流。</li>
+                    <li><strong>生徒中心の学習アプローチ:</strong> 批判的思考、コミュニケーション能力、主体性の重視。</li>
+                    <li><strong>海外大学への進学:</strong> 国際的に認知されたカリキュラムによる有利性。</li>
+                    <li><strong>国内教育システムへの不満 (14.9%):</strong> 代替選択肢としての期待。</li>
+                </ul>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 mt-8">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">駐在員と高度外国人材</h3>
+                    <p class="text-neutral-600 leading-relaxed">子女の教育環境（インターナショナルスクールの質とアクセス）は、高度外国人材が日本で働くかの重要な判断材料。学費や学校数が課題。政府もこの重要性を認識し、教育環境改善の必要性を表明。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">国内教育とのギャップ</h3>
+                    <p class="text-neutral-600 leading-relaxed">生徒の主体性や批判的思考を重視する教育、実践的な「使える英語」への需要が、伝統的な日本の教育システムとの違いを求める保護者層にアピール。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="curriculum" class="content-section py-8 md:py-12">
+            <h2 class="text-3xl font-bold text-amber-700 mb-8 text-center">カリキュラムとプログラムの革新</h2>
+            <p class="text-lg text-neutral-700 leading-relaxed mb-6 text-center">
+                日本のインターナショナルスクールでは、多様な進学先や教育理念に対応するため、様々な国際カリキュラムが採用されています。これにより、生徒は自身の目標や適性に合わせて教育パスを選択できます。
+            </p>
+            <div id="curriculum-accordion-container" class="space-y-4">
+                </div>
+             <div class="grid md:grid-cols-2 gap-6 mt-8">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">認定団体とその重要性</h3>
+                    <p class="text-neutral-600 leading-relaxed">WASC、CISなどの国際認定は、学校全体の質を保証し、大学進学や学校の信頼性確保に不可欠。文科省もこれらの認定団体を調査。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">特化型・オンラインスクール</h3>
+                    <p class="text-neutral-600 leading-relaxed">STEM特化（ローラス等）、芸術分野（ハロウ安比等）のスクールが登場。また、JOIやアオバジャパン・オンラインなど、オンラインでの国際教育提供も新たな動き。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="content-section py-8 md:py-12 bg-white rounded-lg shadow-lg my-8 p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-amber-700 mb-8 text-center">課題の克服：障害と逆風</h2>
+            <p class="text-lg text-neutral-700 leading-relaxed mb-6 text-center">
+                インターナショナルスクール市場の成長には、いくつかの重要な課題が存在します。これらを克服することが、持続的な発展の鍵となります。
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">経済的負担</h3>
+                    <p class="text-neutral-600 leading-relaxed mb-2"><strong>高額な授業料:</strong> 年間135万円～540万円が一般的。ASIJは約270万円～300万円+その他費用。</p>
+                    <p class="text-neutral-600 leading-relaxed mb-2"><strong>追加費用:</strong> 入学金、施設費、教材費など多岐にわたる。</p>
+                    <p class="text-neutral-600 leading-relaxed mb-2"><strong>理由:</strong> 一条校以外は公的補助が少なく、運営費用の大半を授業料に依存。</p>
+                    <p class="text-neutral-600 leading-relaxed"><strong>影響:</strong> 中途退学の主な理由の一つ。円安によるコスト増も懸念。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">人材獲得と維持</h3>
+                    <p class="text-neutral-600 leading-relaxed mb-2">優秀な外国人教員の確保はグローバルな競争。競争力のある給与・福利厚生が必要。</p>
+                    <p class="text-neutral-600 leading-relaxed mb-2">円安は採用難易度を上昇させる。低い教員対生徒比率維持も人件費増に。</p>
+                    <p class="text-neutral-600 leading-relaxed">外国人教員の研修や給与補助に関する国内の体系的支援は限定的。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">インフラと投資</h3>
+                    <p class="text-neutral-600 leading-relaxed mb-2">国際基準を満たす施設の用地取得・建設に多額の初期投資が必要（10億円超も）。</p>
+                    <p class="text-neutral-600 leading-relaxed mb-2">都市部での用地確保は困難。継続的な施設維持・更新も必要。</p>
+                    <p class="text-neutral-600 leading-relaxed">公的な財政支援は限定的。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-3">認定制度と法的認知</h3>
+                    <p class="text-neutral-600 leading-relaxed mb-2">一条校、各種学校、無認可校といった国内法区分と、WASC、CIS、IBなどの国際認定が混在。</p>
+                    <p class="text-neutral-600 leading-relaxed mb-2">法的地位と国際認定が進学資格や転校に影響。特に各種学校卒の場合、IB等がなければ国内大学入学資格が自動付与されないことも。</p>
+                    <p class="text-neutral-600 leading-relaxed">包括的な政府の枠組みが不在。保護者の情報収集を困難に。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="future-outlook" class="content-section py-8 md:py-12">
+            <h2 class="text-3xl font-bold text-amber-700 mb-8 text-center">将来展望と新たな動向</h2>
+            <p class="text-lg text-neutral-700 leading-relaxed mb-6 text-center">
+                日本のインターナショナルスクール市場は、今後も変化と成長を続けると予想されます。いくつかの重要なトレンドが、その未来を形作るでしょう。
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-3">市場の継続的成長と多様化</h3>
+                    <p class="text-neutral-600 leading-relaxed">グローバル化、英語教育への関心、高度外国人材の増加を背景に需要は拡大。特定の教育理念やニーズに特化したスクールが増加する見込み。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-3">オンライン・ハイブリッドモデル</h3>
+                    <p class="text-neutral-600 leading-relaxed">オンラインIBDPパイロット校（アオバジャパン）やオンラインスクール（JOI）が登場。地理的制約を超え、学費抑制の可能性も。ハイブリッド型も普及へ。</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-3">国内教育との連携深化</h3>
+                    <p class="text-neutral-600 leading-relaxed">文科省のIB推進や、一条校での国際カリキュラム導入増は、国内教育への影響を示唆。教員交流、カリキュラム共有、共同プログラム開発が進む可能性。</p>
+                </div>
+                <div class="card md:col-span-2 lg:col-span-3">
+                     <h3 class="text-xl font-semibold mb-3">よりアクセスしやすい選択肢と国家的役割</h3>
+                    <p class="text-neutral-600 leading-relaxed">高額な学費への対応として、オンラインモデルや公設民営型スクール、パートタイム教育サービスなどが学費抑制の選択肢となる可能性。高度外国人材誘致におけるインターナショナルスクールの重要性は増し、国の国際競争力強化の一翼を担う存在として、政府の政策が市場発展の鍵となる。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-neutral-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>&copy; 2025 インタラクティブ・インターナショナルスクール動向レポート</p>
+            <p class="text-sm mt-1">本SPAは提供された報告書に基づいて作成されました。</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIconOpen = document.getElementById('menu-icon-open');
+        const menuIconClose = document.getElementById('menu-icon-close');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            menuIconOpen.classList.toggle('hidden');
+            menuIconClose.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when a link is clicked
+        const mobileNavLinks = mobileMenu.querySelectorAll('a');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                menuIconOpen.classList.remove('hidden');
+                menuIconClose.classList.add('hidden');
+            });
+        });
+        
+        // Accordion for school types and curriculum
+        const accordionButtons = document.querySelectorAll('.accordion-button');
+        accordionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.dataset.target;
+                const targetContent = document.getElementById(targetId);
+                
+                const parentContainer = button.closest('.space-y-3') || button.closest('.space-y-4');
+                if (parentContainer) {
+                    parentContainer.querySelectorAll('.accordion-content').forEach(content => {
+                        if (content.id !== targetId && content.style.maxHeight) {
+                            content.style.maxHeight = null;
+                            const otherButton = parentContainer.querySelector(`[data-target="${content.id}"]`);
+                            if (otherButton) otherButton.classList.remove('bg-amber-200');
+                        }
+                    });
+                }
+
+                if (targetContent.style.maxHeight) {
+                    targetContent.style.maxHeight = null;
+                    button.classList.remove('bg-amber-200');
+                } else {
+                    targetContent.style.maxHeight = targetContent.scrollHeight + "px";
+                    button.classList.add('bg-amber-200');
+                }
+            });
+        });
+
+        // Smooth scroll and active nav link highlighting
+        const navLinks = document.querySelectorAll('nav a, #mobile-menu a');
+        const sections = document.querySelectorAll('.content-section');
+
+        function changeNav(targetId) {
+            navLinks.forEach(link => {
+                link.classList.remove('active-nav');
+                if (link.getAttribute('href') === `#${targetId}`) {
+                    link.classList.add('active-nav');
+                }
+            });
+        }
+        
+        const observerOptions = {
+            root: null,
+            rootMargin: "-20% 0px -80% 0px",
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    changeNav(entry.target.id);
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            observer.observe(section);
+            const rect = section.getBoundingClientRect();
+            if (rect.top >= 0 && rect.top < window.innerHeight / 2) {
+                 changeNav(section.id);
+            }
+        });
+        if (!document.querySelector('.active-nav') && sections.length > 0) {
+            changeNav(sections[0].id);
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const headerOffset = document.querySelector('header').offsetHeight;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                    changeNav(targetId);
+                }
+            });
+        });
+
+        // Chart.js data and initialization
+        const globalMarketCtx = document.getElementById('globalMarketChart').getContext('2d');
+        new Chart(globalMarketCtx, {
+            type: 'bar',
+            data: {
+                labels: ['学校数 (校)', '生徒数 (百万人)', '授業料収入 (十億USD)'],
+                datasets: [{
+                    label: '世界のインターナショナルスクール市場 (2025年1月)',
+                    data: [14833, 7.4, 67.3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                           display: true,
+                           text: '値' // Y軸のタイトル
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString(); // Y軸の目盛りは数値のみ
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || ''; // X軸のカテゴリ名
+                                if (label) {
+                                    label += ': ';
+                                }
+                                let formattedValue = '';
+                                if (context.parsed.y !== null) {
+                                    if (context.label === '生徒数 (百万人)') {
+                                        formattedValue = context.parsed.y + ' 百万人';
+                                    } else if (context.label === '授業料収入 (十億USD)') {
+                                        formattedValue = context.parsed.y + ' 十億USD';
+                                    } else if (context.label === '学校数 (校)') {
+                                        formattedValue = context.parsed.y.toLocaleString() + ' 校';
+                                    } else {
+                                        formattedValue = context.parsed.y.toLocaleString();
+                                    }
+                                }
+                                return label + formattedValue;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const japanStudentSchoolCtx = document.getElementById('japanStudentSchoolChart').getContext('2d');
+        new Chart(japanStudentSchoolCtx, {
+            type: 'line',
+            data: {
+                labels: ['2005年 (各種学校)', '2019年 (生徒数基準年)', '2020年 (各種学校)'],
+                datasets: [{
+                    label: '学校数 (校)',
+                    data: [117, null, 143],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    tension: 0.1,
+                    yAxisID: 'ySchools'
+                }, {
+                    label: '生徒数 (人)',
+                    data: [null, 27948, 31023], 
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    tension: 0.1,
+                    yAxisID: 'yStudents'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    ySchools: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: '学校数 (校)'},
+                        beginAtZero: true
+                    },
+                    yStudents: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: '生徒数 (人)'},
+                        grid: { drawOnChartArea: false },
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+        
+        const parentMotivationCtx = document.getElementById('parentMotivationChart').getContext('2d');
+        new Chart(parentMotivationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['英語能力の習得', 'グローバルな視野', '多文化環境', '国内教育への不満'],
+                datasets: [{
+                    label: '保護者の動機 (%)',
+                    data: [59, 42.9, 21.6, 14.9],
+                    backgroundColor: [
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 99, 132, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return value + "%" }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                     tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.x + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const curriculumData = [
+            {
+                name: "国際バカロレア (IB) ディプロマプログラム",
+                features: "全人的発達、探求型学習、批判的思考、国際的視野の育成。幅広い分野の学習を必須とする。",
+                age: "高校生・大学進学準備期",
+                evaluation: "内部評価、外部評価（最終試験）、拡張論文（EE）、知の理論（TOK）、創造性・活動・奉仕（CAS）",
+                destinations: "世界各国の大学",
+                jp_qualification: "文部科学省により大学入学資格として認定"
+            },
+            {
+                name: "ケンブリッジ国際 Aレベル",
+                features: "科目選択の自由度が高く、特定分野の専門性を深める。学術的な厳密さを重視。",
+                age: "高校生・大学進学準備期",
+                evaluation: "主に最終試験（科目ごと）",
+                destinations: "英国、ヨーロッパ、英連邦諸国、その他世界各国の大学",
+                jp_qualification: "文部科学省により大学入学資格として認定（Aレベル3科目以上など条件あり）"
+            },
+            {
+                name: "米国アドバンスト・プレイスメント (AP)",
+                features: "高校生が大学レベルの科目を履修し、試験を受ける。科目ごとに取得可能。",
+                age: "高校生",
+                evaluation: "標準化された科目別試験",
+                destinations: "主に米国・カナダの大学（単位認定や上級クラス編入の可能性）",
+                jp_qualification: "単独では日本の大学入学資格とはならない場合が多いが、他の資格と併用されることがある"
+            }
+        ];
+
+        const curriculumContainer = document.getElementById('curriculum-accordion-container');
+        curriculumData.forEach((curriculum, index) => {
+            const curriculumId = `curriculum-${index}`;
+            const cardHtml = `
+                <div class="card">
+                    <button class="accordion-button w-full text-left font-semibold text-xl p-4 bg-sky-100 rounded-md hover:bg-sky-200 transition duration-150" data-target="${curriculumId}">
+                        ${curriculum.name}
+                    </button>
+                    <div id="${curriculumId}" class="accordion-content mt-2 p-4 bg-sky-50 rounded-md">
+                        <p class="mb-2"><strong>特徴・教育理念:</strong> ${curriculum.features}</p>
+                        <p class="mb-2"><strong>対象年齢層:</strong> ${curriculum.age}</p>
+                        <p class="mb-2"><strong>評価方法:</strong> ${curriculum.evaluation}</p>
+                        <p class="mb-2"><strong>主な進学先:</strong> ${curriculum.destinations}</p>
+                        <p><strong>日本国内での大学入学資格:</strong> ${curriculum.jp_qualification}</p>
+                    </div>
+                </div>
+            `;
+            curriculumContainer.innerHTML += cardHtml;
+        });
+        
+        const newAccordionButtons = curriculumContainer.querySelectorAll('.accordion-button');
+        newAccordionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.dataset.target;
+                const targetContent = document.getElementById(targetId);
+                
+                const parentContainer = button.closest('.space-y-4');
+                if (parentContainer) {
+                    parentContainer.querySelectorAll('.accordion-content').forEach(content => {
+                        if (content.id !== targetId && content.style.maxHeight) {
+                            content.style.maxHeight = null;
+                             const otherButton = parentContainer.querySelector(`[data-target="${content.id}"]`);
+                            if (otherButton) otherButton.classList.remove('bg-amber-200');
+                        }
+                    });
+                }
+
+                if (targetContent.style.maxHeight) {
+                    targetContent.style.maxHeight = null;
+                    button.classList.remove('bg-amber-200');
+                } else {
+                    targetContent.style.maxHeight = targetContent.scrollHeight + "px";
+                    button.classList.add('bg-amber-200');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
